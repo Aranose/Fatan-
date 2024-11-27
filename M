@@ -1,0 +1,45 @@
+import speech_recognition as sr
+from googletrans import Translator
+
+# Initialize recognizer and translator
+recognizer = sr.Recognizer()
+translator = Translator()
+
+# Function to capture, transcribe, and translate audio
+def capture_and_translate():
+    with sr.Microphone() as source:
+        print("Adjusting for ambient noise... Please wait.")
+        recognizer.adjust_for_ambient_noise(source)  # Calibrate the microphone to ignore background noise
+        print("Listening... Speak something.")
+
+        try:
+            # Listen for audio input
+            audio = recognizer.listen(source, timeout=10)
+            print("Processing audio...")
+
+            # Recognize speech
+            original_text = recognizer.recognize_google(audio, language="en-US")
+            print(f"Captured text: {original_text}")
+
+            # Translate the text
+            translated_text = translator.translate(original_text, src="en", dest="es")  # English to Spanish
+            print(f"Translated text: {translated_text.text}")
+            
+            return original_text, translated_text.text
+
+        except sr.UnknownValueError:
+            print("Sorry, could not understand the audio.")
+        except sr.RequestError as e:
+            print(f"Could not request results from Google Speech Recognition service; {e}")
+        except Exception as e:
+            print(f"An error occurred: {e}")
+
+# Main loop for continuous translation
+if __name__ == "__main__":
+    print("Press Ctrl+C to stop the program.")
+    while True:
+        try:
+            capture_and_translate()
+        except KeyboardInterrupt:
+            print("\nExiting program.")
+            break
